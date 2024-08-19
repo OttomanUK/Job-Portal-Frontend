@@ -1,10 +1,20 @@
-import React from 'react'
-import Navbar from './shared/navbar'
+import React from "react";
+import Navbar from "./shared/navbar";
+import HeroSection from "./HeroSection";
+import CategoryCarousel from "./CategoryCarousel";
+import LatestJobs from "./LatestJobs";
+import Footer from "./shared/Footer";
 
 const Home = () => {
   return (
-    <Navbar/>
-  )
-}
+    <div>
+      <Navbar />
+      <HeroSection/>
+      <CategoryCarousel/>
+      <LatestJobs/>
+      <Footer/>
+    </div>
+  );
+};
 
-export default Home
+export default Home;

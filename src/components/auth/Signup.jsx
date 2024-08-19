@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import Navbar from "../shared/navbar";
 import axios from "axios";
 import { toast } from "sonner";
 import { USER_API_END_POINT } from "../../utils/constant.js";
