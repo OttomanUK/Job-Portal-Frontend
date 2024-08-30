@@ -10,6 +10,8 @@ import { USER_API_END_POINT } from "../../utils/constant.js";
 import { useDispatch, useSelector } from "react-redux";
 import store from "../../redux/store.js";
 import { setLoading } from "../../redux/authSlice.js";
+import Navbar from "../shared/navbar.jsx";
+import { Loader2 } from "lucide-react";
 
 const Signup = () => {
   const [input, setInput] = useState({

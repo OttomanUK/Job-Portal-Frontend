@@ -1,9 +1,68 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useParams } from "react-router-dom";
+
+import axios from "axios";
+import { setSingleJob } from "../redux/jobSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { JOB_API_END_POINT } from "../utils/constant";
+import { APPLICATION_API_END_POINT } from "../utils/constant";
+import { toast } from "sonner";
+
+
 
 const JobDescription = () => {
-  const isApplied = false;
+  const params = useParams();
+  const jobId = params.id;
+  const dispatch = useDispatch();
+  const { singleJob } = useSelector((store) => store.job);
+  const { user } = useSelector((store) => store.auth);
+  const isInitiallyApplied =
+    singleJob?.application?.some(
+      (application) => application.applicant === user?._id
+    ) || false;
+
+  const [isApplied, setisApplied] = useState(isInitiallyApplied);
+  const applyJobHandler = async () => {
+    try {
+      const res = await axios.get(
+        `${APPLICATION_API_END_POINT}/apply/${jobId}`,
+        { withCredentials: true }
+      );
+      console.log(res.data);
+      if (res.data.success) {
+        setisApplied(true); //Update the local state
+        const updatedSingleJob = {
+          ...singleJob,
+          application: [...singleJob.application, { applicant: user?._id }],
+        };
+        dispatch(setSingleJob(updatedSingleJob)); //real time UI update
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data.message);
+    }
+  };
+
+  useEffect(() => {
+    const fetchSingleJob = async () => {
+      try {
+        const res = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`, {
+          withCredentials: true,
+        });
+        if (res.data.success) {
+          dispatch(setSingleJob(res.data.job));
+          setisApplied(res.data.job.application.some(application => application.applicant === user?._id)) //Ensure the state is in sync with the fetched data
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchSingleJob();
+  }, [jobId, dispatch, user?._id]);
+
   return (
     <div className="max-w-7xl mx-auto my-10">
       <div className="flex items-center justify-between">
@@ -22,6 +81,7 @@ const JobDescription = () => {
           </div>
         </div>
         <Button
+          onClick={isApplied ? null : applyJobHandler}
           disabled={isApplied}
           className={`rounded-lg ${
             isApplied
@@ -36,13 +96,48 @@ const JobDescription = () => {
         Job Description
       </h1>
       <div className="my-4">
-        <h1 className="font-bold my-1">Role: <span className="pl-4 font-normal text-gray-800">Mern Stack Developer</span> </h1>
-        <h1 className="font-bold my-1">Location: <span className="pl-4 font-normal text-gray-800">Karachi</span> </h1>
-        <h1 className="font-bold my-1">Description: <span className="pl-4 font-normal text-gray-800">lorem ipsum</span> </h1>
-        <h1 className="font-bold my-1">Experience: <span className="pl-4 font-normal text-gray-800">2 yrs</span> </h1>
-        <h1 className="font-bold my-1">Salary: <span className="pl-4 font-normal text-gray-800">12 LPA</span>  </h1>
-        <h1 className="font-bold my-1">Total Applicants: <span className="pl-4 font-normal text-gray-800">4</span> </h1>
-        <h1 className="font-bold my-1">Posted Date: <span className="pl-4 font-normal text-gray-800">7/9/2024</span> </h1>
+        <h1 className="font-bold my-1">
+          Role:{" "}
+          <span className="pl-4 font-normal text-gray-800">
+            {singleJob?.title}
+          </span>{" "}
+        </h1>
+        <h1 className="font-bold my-1">
+          Location:{" "}
+          <span className="pl-4 font-normal text-gray-800">
+            {singleJob?.location}
+          </span>{" "}
+        </h1>
+        <h1 className="font-bold my-1">
+          Description:{" "}
+          <span className="pl-4 font-normal text-gray-800">
+            {singleJob?.description}
+          </span>{" "}
+        </h1>
+        <h1 className="font-bold my-1">
+          Experience:{" "}
+          <span className="pl-4 font-normal text-gray-800">
+            {singleJob?.experience}
+          </span>{" "}
+        </h1>
+        <h1 className="font-bold my-1">
+          Salary:{" "}
+          <span className="pl-4 font-normal text-gray-800">
+            {singleJob?.salary}
+          </span>{" "}
+        </h1>
+        <h1 className="font-bold my-1">
+          Total Applicants:{" "}
+          <span className="pl-4 font-normal text-gray-800">
+            {singleJob?.application?.length}
+          </span>{" "}
+        </h1>
+        <h1 className="font-bold my-1">
+          Posted Date:{" "}
+          <span className="pl-4 font-normal text-gray-800">
+            {singleJob?.createdAt.split("T")[0]}
+          </span>{" "}
+        </h1>
       </div>
     </div>
   );
